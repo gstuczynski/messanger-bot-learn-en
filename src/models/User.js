@@ -14,6 +14,12 @@ const userSchema = new Schema({
   points: {
     type: Number,
     required: true
+  },
+  todayAddWordsLeft: {
+    type: Number
+  },
+  todayAnswerLeft: {
+    type: Number
   }
 });
 

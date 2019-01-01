@@ -14,26 +14,55 @@ const addUser = user => {
 };
 
 exports.findUser = userId =>
-  User.findOne({ _id: userId }, (err, user) => user.nick).then(nick => nick);
+  User.findOne({ _id: userId }, (err, user) => {
+    if (err) {
+      console.log(err);
+    }
+    return user;
+  });
 
-exports.listUsers = () =>
+exports.getAllUsers = () =>
   User.find()
-    .then(users => {
-      return users;
-    })
+    .then(users => users)
     .catch(err => {
       console.log(err);
     });
 
-exports.handlingNotExistingUser = message => {
+exports.handlingNotExistingUser = (message, userId) => {
   if (message.includes("/my_nick:")) {
     const nick = message.split(" ")[1];
     addUser({ userId, nick });
     return `Thanks, I'll remember you ${nick}`;
   }
-  return `What is your name <br />
-          Type: /n
-          /my_nick: ${your_nick}`;
+  return `What is your name 
+Type:
+/my_nick: {your_nick}`;
 };
 
 exports.addUser = addUser;
+
+exports.incPoints = userId =>
+  User.findOneAndUpdate({ _id: userId }, { $inc: { points: 1 } })
+    .then(res => console.log("Increased Points"))
+    .catch(err => console.log(err));
+
+exports.todayAddWordDec = userId =>
+  User.findOneAndUpdate(
+    { _id: userId, todayAddWordsLeft: { $gte: 1 } },
+    { $inc: { todayAddWordsLeft: -1 } }
+  )
+    .then(res => console.log("Decreased todayAddWordsLeft"))
+    .catch(err => console.log(err));
+
+exports.todayAnswerLeftDec = userId =>
+  User.findOneAndUpdate(
+    { _id: userId, todayAnswerLeft: { $gte: 1 } },
+    { $inc: { todayAnswerLeft: -1 } }
+  )
+    .then(res => console.log("Decreased todayAnswerLeft"))
+    .catch(err => console.log(err));
+
+exports.dailyResetUsers = () =>
+  User.updateMany({}, { todayAnswerLeft: 3, todayAddWordsLeft: 3 })
+    .then(res => console.log("Reseted"))
+    .catch(err => console.log(err));
